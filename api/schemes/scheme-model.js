@@ -13,9 +13,8 @@ function find() { // EXERCISE A
     .leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
     .select('sc.*')
     .count('st.step_id as number_of_steps')
-    
-    // .groupBy('sc.scheme_id')
-    // .orderBy('sc.scheme_id', 'asc')
+    .groupBy('sc.scheme_id')
+    .orderBy('sc.scheme_id', 'asc')
 
   /*
     1A- Study the SQL query below running it in SQLite Studio against `data/schemes.db3`.
@@ -168,6 +167,17 @@ function add(scheme) { // EXERCISE D
 }
 
 function addStep(scheme_id, step) { // EXERCISE E
+  return db('steps').insert({
+    ...step,
+    scheme_id
+  })
+    .then(() => {
+      return db('steps as st')
+        .join('schemes as sc', 'sc.scheme_id', 'st.scheme_id')
+        .select('step_id', 'step_number', 'instructions', 'scheme_name')
+        .orderBy('step_number')
+        .where('sc.scheme_id', scheme_id)
+    })
   /*
     1E- This function adds a step to the scheme with the given `scheme_id`
     and resolves to _all the steps_ belonging to the given `scheme_id`,

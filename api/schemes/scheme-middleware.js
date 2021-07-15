@@ -43,7 +43,7 @@ const validateScheme = (req, res, next) => {
   ) {
     next({
       status: 400,
-      message: 'invalid scheme name'
+      message: 'invalid scheme_name'
     }) 
   } else {
       next()
