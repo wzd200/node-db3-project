@@ -1,13 +1,21 @@
 const db = require('../../data/db-config')
 
-async function find() { // EXERCISE A
-  const schemes = await db('schemes as sc')
-    .leftJoin('steps as st', 'sc.scheme_id', '=', 'st.scheme_id')
+function find() { // EXERCISE A
+  // const schemes = await db('schemes as sc')
+  //   .leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
+  //   .select('sc.*')
+  //   .count('st.step_id as number_of_steps')
+  //   .groupBy('sc.scheme_id')
+  //   .orderBy('sc.scheme_id', 'asc')
+  // return schemes
+
+  return db('schemes as sc')
+    .leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
     .select('sc.*')
     .count('st.step_id as number_of_steps')
-    .groupBy('sc.scheme_id')
-    .orderBy('sc.scheme_id', 'asc')
-  return schemes
+    
+    // .groupBy('sc.scheme_id')
+    // .orderBy('sc.scheme_id', 'asc')
 
   /*
     1A- Study the SQL query below running it in SQLite Studio against `data/schemes.db3`.
@@ -28,12 +36,29 @@ async function find() { // EXERCISE A
 }
 
 async function findById(scheme_id) { // EXERCISE B
-  const scheme = await db('schemes as sc')
-    .leftJoin('steps as st', 'sc.scheme_id', '=', 'st.scheme_id')
-    .select('sc.scheme_name', 'st.*')
-    .where('sc.scheme_id', `${scheme_id}`)
-    .orderBy('st.step_number', 'ASC')
-  return scheme
+  const rows = await db('schemes as sc')
+    .leftJoin('steps as st', 'sc.scheme_id','st.scheme_id')
+    .where('sc.scheme_id', scheme_id)
+    .select('st.*', 'sc.scheme_name', 'sc.scheme_id')
+    .orderBy('st.step_number')
+  
+  const result = {
+    scheme_id: rows[0].scheme_id,
+    scheme_name: rows[0].scheme_name,
+    steps: []
+  }
+
+  rows.forEach(row => {
+    if (row.step_id) {
+      result.steps.push({
+        step_id: row.step_id,
+        step_number: row.step_number,
+        instructions: row.instructions,
+      })
+    }
+  })
+
+  return result
   /*
     1B- Study the SQL query below running it in SQLite Studio against `data/schemes.db3`:
 
@@ -101,7 +126,15 @@ async function findById(scheme_id) { // EXERCISE B
   */
 }
 
-function findSteps(scheme_id) { // EXERCISE C
+async function findSteps(scheme_id) { // EXERCISE C
+  const rows = await db('schemes as sc')
+    .leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
+    .select('st.step_id', 'st.step_number', 'instructions', 'sc.scheme_name')
+    .where('sc.scheme_id', scheme_id)
+    .orderBy('step_number')
+
+    if (!rows[0].step_id) return []
+    return rows
   /*
     1C- Build a query in Knex that returns the following data.
     The steps should be sorted by step_number, and the array

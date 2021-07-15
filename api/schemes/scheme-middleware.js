@@ -9,7 +9,7 @@ const db = require('../../data/db-config')
 */
 const checkSchemeId = async (req, res, next) => {
   try {
-    const existing = await db('schemes')
+    const existing = await db('schemes') // why does this work?
       .where('scheme_id', req.params.scheme_id)
       .first()
 
